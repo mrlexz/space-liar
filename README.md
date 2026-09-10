@@ -94,3 +94,17 @@ npm run build
 - Không có voice chat, tài khoản, lịch sử hoặc upload khuôn mặt.
 - Độ trễ đồng bộ tối đa khoảng một giây trong mạng bình thường.
 - Chưa tự động đưa bản này lên dịch vụ hosting của bạn. URL Sites bản trước vẫn là bản chơi với máy.
+
+## Súng sơn và thứ hạng
+
+Mỗi người chịu bắn có ổ đạn riêng ban đầu gồm 1 viên sơn và 5 viên rỗng. Mỗi phát chọn ngẫu nhiên trong số viên còn lại và tiêu hao đúng 1 viên; không nạp lại giữa các vòng. Người tố thực hiện động tác bắn, còn số đạn/rủi ro được tính theo người chịu bắn. Sau 5 lần thoát đạn rỗng, viên cuối chắc chắn là sơn.
+
+Sau 4 giây lên nòng và 0,7 giây bắn, kết quả được công bố. Đạn rỗng không loại ai. Trúng sơn mới bị loại (rời phòng vẫn được tính bỏ cuộc). Sau 2 giây hiển thị kết quả, tự chia vòng mới cho cả online và chơi với máy. Chỉ dừng khi còn một người hạng nhất. Bắt đầu ván mới mới nạp lại 6 viên.
+
+`shared/paint.mjs` chứa luật và thời gian; `app/paint-scene.ts` dựng súng và sơn, `app/paint-ui.tsx` hiển thị ổ đạn. Khởi động lại server sau cập nhật; phòng trong RAM sẽ mất.
+
+Khi một người đánh hết bài, người kế tiếp bắt buộc bấm kiểm chứng lượt đó, không được đánh tiếp. Nói thật thì người kiểm chứng chịu bắn; nói dối thì người hết bài chịu bắn. Hết bài không thắng ván.
+
+## Âm thanh
+
+Bấm biểu tượng loa để bật tiếng (mặc định tắt, cần thao tác người dùng để trình duyệt cho phép phát). Online và chơi với máy dùng chung `app/game-audio.tsx`: tiếng chia/đánh bài, tố nói dối, lên nòng, nhịp tim tăng dần, bắn, đạn rỗng, sơn và thắng ván. Âm thanh được tổng hợp bằng Web Audio, không cần tải file ngoài hoặc API. Khi ẩn tab sẽ im tiếng; tắt loa hoặc rời chế độ sẽ hủy lịch âm thanh đang chờ. Chưa kiểm tra nghe thực tế trên nhiều trình duyệt/thiết bị.

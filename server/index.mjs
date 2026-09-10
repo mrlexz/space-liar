@@ -2,7 +2,7 @@ import http from 'node:http';
 import {readFile} from 'node:fs/promises';
 import {resolve,extname} from 'node:path';
 import {fileURLToPath} from 'node:url';
-import {create,join,auth,view,act,leave,sweep} from './game.mjs';
+import {create,join,auth,view,act,leave,sweep,tick} from './game.mjs';
 const root=fileURLToPath(new URL('../dist/',import.meta.url));
 const buckets=new Map();
 export const server=http.createServer(async(req,res)=>{const json=(data,status=200)=>{res.writeHead(status,{'Content-Type':'application/json','Cache-Control':'no-store'});res.end(JSON.stringify(data));};
@@ -20,5 +20,6 @@ export const server=http.createServer(async(req,res)=>{const json=(data,status=2
  if(!['GET','HEAD'].includes(req.method)){res.writeHead(405);return res.end();}const path=resolve(root,'.'+decodeURIComponent(url.pathname==='/'?'/index.html':url.pathname));if(!path.startsWith(root)){res.writeHead(403);return res.end();}try{const data=await readFile(path);const types={'.html':'text/html; charset=utf-8','.js':'text/javascript','.css':'text/css','.svg':'image/svg+xml','.glb':'model/gltf-binary'};res.writeHead(200,{'Content-Type':types[extname(path)]??'application/octet-stream','X-Content-Type-Options':'nosniff','Cache-Control':path.includes('/assets/')?'public, max-age=31536000, immutable':'no-cache'});res.end(req.method==='HEAD'?undefined:data);}catch{res.writeHead(404);res.end('Not found');}
  }catch(e){json({error:e.message??'Yêu cầu không hợp lệ.'},400);}
 });
+const shotTimer=setInterval(()=>tick(),100);shotTimer.unref();
 const timer=setInterval(()=>{sweep();for(const [k,b] of buckets)if(Date.now()-b.time>120000)buckets.delete(k)},5000);timer.unref();
 if(process.argv[1]===fileURLToPath(import.meta.url))server.listen(Number(process.env.PORT??3001),'0.0.0.0',()=>console.log(`Office Bluff: http://localhost:${process.env.PORT??3001}`));

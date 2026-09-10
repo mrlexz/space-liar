@@ -9,6 +9,7 @@ WORKDIR /app
 ENV NODE_ENV=production PORT=3001
 COPY --from=build /app/dist ./dist
 COPY --from=build /app/server ./server
+COPY --from=build /app/shared ./shared
 USER node
 EXPOSE 3001
 CMD ["node","server/index.mjs"]

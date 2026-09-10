@@ -55,5 +55,5 @@ export function createCharacter(color:string,variant:number) {
       finger.rotation.x=i===1&&target?0:-1.3;
     });
   }
-  return {root,update,dispose(){geometries.forEach(g=>g.dispose());materials.forEach(m=>m.dispose());}};
+  return {root,head,gunHand:arms[1].pivot,update,dispose(){geometries.forEach(g=>g.dispose());materials.forEach(m=>m.dispose());}};
 }
