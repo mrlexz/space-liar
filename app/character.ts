@@ -28,7 +28,7 @@ export function createCharacter(color:string,variant:number,appearance?:Appearan
    const texture=new THREE.CanvasTexture(canvas);texture.colorSpace=THREE.SRGBColorSpace;textures.push(texture);const print=new THREE.MeshStandardMaterial({map:texture,roughness:.8});materials.push(print);shape(new THREE.PlaneGeometry(.49,.51),print,root,0,1.48,.407);
   }
   head.position.y=2.32;root.add(head);ball(.48,skin,head,0,0,0);
-  const cap=ball(.5,hair,head,0,.2,-.08);cap.scale.y=.64;
+  const cap=ball(.5,hair,head,0,.2,-.08);cap.scale.y=.64;cap.visible=look.hairStyle!=='bald';
   for(const side of [-1,1]){
     ball(.095,skin,head,side*.47,0,0);
     const eye=ball(.082,cream,head,side*.17,.06,.424);eye.scale.y=.8;
@@ -42,6 +42,10 @@ export function createCharacter(color:string,variant:number,appearance?:Appearan
    box(.1,.022,.022,gold,head,0,.07,.52);
   }
   if(look.hairStyle==='parted'){for(const side of [-1,1]){const lock=ball(.23,hair,head,side*.21,.29,.24);lock.scale.set(1,.7,.5);lock.rotation.z=side*.35;}}
+  if(look.hairStyle==='bald'){
+   // Horseshoe of hair around the sides and back, leaving the crown exposed.
+   shape(new THREE.SphereGeometry(.49,32,12,Math.PI*.85,Math.PI*1.3,Math.PI*.28,Math.PI*.25),hair,head,0,0,0);
+  }
   if(look.hairStyle==='short'){
    // A full crown above the scalp, rather than a flattened sphere buried in it.
    cap.visible=false;

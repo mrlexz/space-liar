@@ -10,7 +10,7 @@ export function normalizeAppearance(input,variant=0){
  if(typeof input!=='object'||Array.isArray(input))throw new Error('Diện mạo không hợp lệ.');
  const result={...base};
  for(const key of ['shirt','pants','skin','hair','shoes'])if(input[key]!==undefined){if(typeof input[key]!=='string'||!/^#[0-9a-fA-F]{6}$/.test(input[key]))throw new Error('Màu nhân vật không hợp lệ.');result[key]=input[key];}
- for(const [key,values] of Object.entries({hairStyle:['parted','short','swept','fringe'],glasses:['none','clear','sun'],outfit:['jersey','graphic','polo','striped'],pantsStyle:['shorts','long']}))if(input[key]!==undefined){if(!values.includes(input[key]))throw new Error('Kiểu nhân vật không hợp lệ.');result[key]=input[key];}
+ for(const [key,values] of Object.entries({hairStyle:['parted','short','swept','fringe','bald'],glasses:['none','clear','sun'],outfit:['jersey','graphic','polo','striped'],pantsStyle:['shorts','long']}))if(input[key]!==undefined){if(!values.includes(input[key]))throw new Error('Kiểu nhân vật không hợp lệ.');result[key]=input[key];}
  if(input.build!==undefined){if(typeof input.build!=='number'||!Number.isFinite(input.build)||input.build<.85||input.build>1.2)throw new Error('Dáng người không hợp lệ.');result.build=input.build;}
  return result;
 }
