@@ -11,7 +11,7 @@ export const server=http.createServer(async(req,res)=>{const json=(data,status=2
  if(req.method==='POST'&&req.headers.origin&&req.headers['sec-fetch-site']==='cross-site')return json({error:'Yêu cầu khác nguồn không được phép.'},403);
  if(url.pathname==='/api/health')return json({ok:true});
  let body={};if(req.method==='POST'){let raw='';for await(const chunk of req){raw+=chunk;if(raw.length>4096)return json({error:'Yêu cầu quá lớn.'},413);}try{body=JSON.parse(raw||'{}')}catch{return json({error:'JSON không hợp lệ.'},400)}}
- if(req.method==='POST'&&['/api/create','/api/join'].includes(url.pathname)){const {room,player}=url.pathname==='/api/create'?create(body.name,body.character):join(String(body.code??'').toUpperCase(),body.name,body.character);return json({token:player.token,state:view(room,player)});}
+ if(req.method==='POST'&&['/api/create','/api/join'].includes(url.pathname)){const {room,player}=url.pathname==='/api/create'?create(body.name,body.character,body.appearance):join(String(body.code??'').toUpperCase(),body.name,body.character,body.appearance);return json({token:player.token,state:view(room,player)});}
  const token=(req.headers.authorization??'').replace(/^Bearer /,'');const {room,player}=auth(url.searchParams.get('code'),token);
  if(req.method==='GET'&&url.pathname==='/api/state')return json(view(room,player));
  if(req.method==='POST'&&url.pathname==='/api/action'){act(room,player,body.action,body.revision,body.indices);return json(view(room,player));}

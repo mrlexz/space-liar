@@ -1,19 +1,32 @@
 import * as THREE from 'three';
+import {normalizeAppearance} from '../shared/appearance.mjs';
+import type {Appearance} from './appearance';
 
 // A small articulated rig: local +Z faces the table; fingers point along +Z.
-export function createCharacter(color:string,variant:number) {
+export function createCharacter(color:string,variant:number,appearance?:Appearance) {
+  const look=normalizeAppearance(appearance,variant);
   const root=new THREE.Group(),head=new THREE.Group();
   const materials:THREE.Material[]=[],geometries:THREE.BufferGeometry[]=[];
   function material(color:string){const m=new THREE.MeshStandardMaterial({color,roughness:.7});materials.push(m);return m;}
-  const skin=material(['#ecc0a0','#dfae91','#bc8d70','#edc5ad'][variant]),shirt=material(color),dark=material('#252630'),cream=material('#f4e9d4'),gold=material('#d5b06c'),hair=material(['#27232a','#32252b','#211f26','#51332c'][variant]);
+  const skin=material(look.skin),shirt=material(look.shirt),dark=material('#252630'),pants=material(look.pants),shoes=material(look.shoes),cream=material('#f4e9d4'),gold=material('#d5b06c'),hair=material(look.hair);
+  const textures:THREE.Texture[]=[];
   function shape(g:THREE.BufferGeometry,m:THREE.Material,p:THREE.Object3D,x:number,y:number,z:number){geometries.push(g);const o=new THREE.Mesh(g,m);o.position.set(x,y,z);o.castShadow=true;o.receiveShadow=true;p.add(o);return o;}
   const box=(w:number,h:number,d:number,m:THREE.Material,p:THREE.Object3D,x:number,y:number,z:number)=>shape(new THREE.BoxGeometry(w,h,d),m,p,x,y,z);
   const ball=(r:number,m:THREE.Material,p:THREE.Object3D,x:number,y:number,z:number)=>shape(new THREE.SphereGeometry(r,20,14),m,p,x,y,z);
   const torso=shape(new THREE.CylinderGeometry(.42,.5,.88,20),shirt,root,0,1.5,0);torso.scale.z=.8;
-  box(.08,.65,.03,cream,root,0,1.5,.385);
-  for(const side of [-1,1]){const collar=box(.19,.19,.05,cream,root,side*.12,1.87,.35);collar.rotation.z=side*.45;box(.23,.64,.28,dark,root,side*.27,.85,.2);box(.27,.15,.43,dark,root,side*.27,.49,.29);}
-  for(let i=0;i<3;i++)ball(.025,gold,root,0,1.65-i*.16,.415);
-  box(.2,.22,.025,cream,root,-.23,1.56,.37);box(.14,.06,.015,gold,root,-.23,1.6,.39);
+  for(const side of [-1,1]){if(look.pantsStyle==='shorts'){box(.23,.32,.28,pants,root,side*.27,1.01,.2);box(.18,.32,.22,skin,root,side*.27,.69,.2);}else box(.23,.64,.28,pants,root,side*.27,.85,.2);box(.27,.15,.43,shoes,root,side*.27,.49,.29);}
+  if(look.outfit==='polo'||look.outfit==='striped'){
+   for(const side of [-1,1]){const collar=box(.19,.19,.05,cream,root,side*.12,1.87,.35);collar.rotation.z=side*.45;}
+   box(.045,look.outfit==='polo'?.25:.68,.03,cream,root,0,1.53,.408);
+   for(let i=0;i<(look.outfit==='polo'?2:4);i++)ball(.016,gold,root,0,1.72-i*.13,.425);
+  }
+  if(look.outfit==='striped')for(let i=-4;i<=4;i++)box(.011,.66,.025,cream,root,i*.074,1.5,.38-Math.abs(i)*.014);
+  if(look.outfit==='jersey'||look.outfit==='graphic'){
+   const canvas=document.createElement('canvas');canvas.width=256;canvas.height=256;const ctx=canvas.getContext('2d')!;
+   ctx.fillStyle=look.shirt;ctx.fillRect(0,0,256,256);ctx.textAlign='center';ctx.font='bold 170px Arial';ctx.fillStyle='#f5f5f5';
+   if(look.outfit==='jersey')ctx.fillText('11',128,192);else{ctx.font='bold 65px Arial';for(let i=0;i<3;i++){ctx.fillStyle=i===1?'#e26055':'#337ca7';ctx.fillText('BALI',128,70+i*72);}}
+   const texture=new THREE.CanvasTexture(canvas);texture.colorSpace=THREE.SRGBColorSpace;textures.push(texture);const print=new THREE.MeshStandardMaterial({map:texture,roughness:.8});materials.push(print);shape(new THREE.PlaneGeometry(.49,.51),print,root,0,1.48,.407);
+  }
   head.position.y=2.32;root.add(head);ball(.48,skin,head,0,0,0);
   const cap=ball(.5,hair,head,0,.2,-.08);cap.scale.y=.64;
   for(const side of [-1,1]){
@@ -24,10 +37,21 @@ export function createCharacter(color:string,variant:number) {
     const cheek=ball(.064,material('#cb8d7c'),head,side*.3,-.07,.365);cheek.scale.z=.3;
   }
   ball(.065,skin,head,0,-.055,.48);box(.14,.025,.03,dark,head,0,-.19,.439);
-  if(variant===0){for(const side of [-1,1])shape(new THREE.TorusGeometry(.12,.018,8,24),gold,head,side*.17,.06,.506);box(.1,.018,.02,gold,head,0,.07,.51);}
-  if(variant===1){const pony=ball(.29,hair,head,0,.08,-.41);pony.scale.y=1.7;for(const side of [-1,1])ball(.04,gold,head,side*.47,-.08,.04);}
-  if(variant===2){shape(new THREE.CylinderGeometry(.5,.5,.13,24),shirt,head,0,.43,0);box(.6,.045,.4,shirt,head,0,.4,.32);}
-  if(variant===3){ball(.24,hair,head,0,.29,-.34);box(.23,.045,.045,gold,head,.23,.29,.31);}
+  if(look.glasses!=='none'){
+   for(const side of [-1,1]){shape(new THREE.TorusGeometry(.13,.021,8,24),gold,head,side*.17,.06,.515);if(look.glasses==='sun'){const lens=ball(.12,material('#44455b'),head,side*.17,.06,.51);lens.scale.z=.2;}}
+   box(.1,.022,.022,gold,head,0,.07,.52);
+  }
+  if(look.hairStyle==='parted'){for(const side of [-1,1]){const lock=ball(.23,hair,head,side*.21,.29,.24);lock.scale.set(1,.7,.5);lock.rotation.z=side*.35;}}
+  if(look.hairStyle==='short'){
+   // A full crown above the scalp, rather than a flattened sphere buried in it.
+   cap.visible=false;
+   shape(new THREE.SphereGeometry(.515,28,18,0,Math.PI*2,0,Math.PI*.42),hair,head,0,.08,-.02);
+   for(const side of [-1,1]){const temple=ball(.13,hair,head,side*.43,.16,-.06);temple.scale.set(.5,1.2,1.6);}
+  }
+  if(look.hairStyle==='swept'){const lock=ball(.3,hair,head,-.08,.33,.16);lock.scale.set(1.3,.45,.8);lock.rotation.z=-.25;}
+  if(look.hairStyle==='fringe')for(let i=-2;i<=2;i++){const lock=ball(.12,hair,head,i*.14,.23,.35);lock.scale.set(.65,1.35,.5);}
+  if(variant===1){head.scale.x=1.07;const smile=shape(new THREE.TorusGeometry(.085,.009,8,20,Math.PI),material('#7e4b42'),head,0,-.145,.468);smile.rotation.z=Math.PI;}
+  root.scale.x=look.build;
   const arms=[-1,1].map(side=>{
     const pivot=new THREE.Group();pivot.position.set(side*.43,1.83,.04);root.add(pivot);
     const sleeve=shape(new THREE.CapsuleGeometry(.115,.33,5,12),shirt,pivot,0,0,.22);sleeve.rotation.x=Math.PI/2;
@@ -55,5 +79,5 @@ export function createCharacter(color:string,variant:number) {
       finger.rotation.x=i===1&&target?0:-1.3;
     });
   }
-  return {root,head,gunHand:arms[1].pivot,update,dispose(){geometries.forEach(g=>g.dispose());materials.forEach(m=>m.dispose());}};
+  return {root,head,gunHand:arms[1].pivot,update,dispose(){geometries.forEach(g=>g.dispose());materials.forEach(m=>m.dispose());textures.forEach(t=>t.dispose());}};
 }

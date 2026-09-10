@@ -108,3 +108,11 @@ Khi một người đánh hết bài, người kế tiếp bắt buộc bấm ki
 ## Âm thanh
 
 Bấm biểu tượng loa để bật tiếng (mặc định tắt, cần thao tác người dùng để trình duyệt cho phép phát). Online và chơi với máy dùng chung `app/game-audio.tsx`: tiếng chia/đánh bài, tố nói dối, lên nòng, nhịp tim tăng dần, bắn, đạn rỗng, sơn và thắng ván. Âm thanh được tổng hợp bằng Web Audio, không cần tải file ngoài hoặc API. Khi ẩn tab sẽ im tiếng; tắt loa hoặc rời chế độ sẽ hủy lịch âm thanh đang chờ. Chưa kiểm tra nghe thực tế trên nhiều trình duyệt/thiết bị.
+
+## Chọn và tùy chỉnh nhân vật
+
+Bốn mẫu hoạt hình lấy cảm hứng từ ảnh tham chiếu, từ trái sang phải: Quí (kính râm, áo 11), Anh Hồ (áo thun trắng BALI), Nguyên (polo nâu), Khánh Em (sơ mi xanh sọc). Đây là mô hình hoạt hình, không phải bản quét khuôn mặt hay bản sao ảnh chân thực.
+
+Màn hình vào game hiển thị nhân vật toàn thân, có thể xoay/thu phóng. Chọn mẫu rồi mở “Tùy chỉnh diện mạo” để đổi màu áo, quần, da, tóc, giày; đổi tóc, kính, loại áo và dáng người. Lựa chọn lưu ở localStorage trên máy; bấm khôi phục để về mẫu gốc. Áp dụng cả bản máy và online. Trong online, diện mạo được gửi khi tạo/tham gia phòng và được chia sẻ với mọi người; muốn đổi tiếp thì về màn hình chọn nhân vật.
+
+`shared/appearance.mjs` chứa mẫu và kiểm tra dữ liệu; `app/character-editor.tsx` chứa phần chỉnh/xem trước; `app/character.ts` dựng nhân vật. Không cần tải ảnh tham chiếu lên máy chủ. Khởi động lại server sau cập nhật để API nhận dữ liệu diện mạo.

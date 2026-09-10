@@ -30,3 +30,12 @@ test('Five blanks consume ammo, sixth shot hits, automatic round preserves ammo'
 test('Last cards force verification, reject play without mutation and handle truth/bluff',()=>{
  for(const card of ['K','Q']){rooms.clear();const {room:r,player:a}=create('A',0);const b=join(r.code,'B',1).player;act(r,a,'start',r.revision);r.game.target='K';r.game.hands[0]=[card];act(r,a,'play',r.revision,[0]);assert.equal(r.game.turn,1);assert.equal(view(r,b).game.counts[0],0);const before=JSON.stringify(r);assert.throws(()=>act(r,b,'play',r.revision,[0]),/kiểm chứng/);assert.equal(JSON.stringify(r),before);act(r,b,'challenge',r.revision);assert.equal(r.game.phase,'loading');assert.equal(r.game.shot.target,card==='K'?1:0);r.game=advancePaint(r.game,['A','B'],r.game.shot.resolveAt,()=>1);tick(r.game.nextRoundAt);assert.equal(r.game.phase,'play');assert.equal(r.game.last,null);act(r,r.players[r.game.turn],'play',r.revision,[0]);}
 });
+
+test('Custom appearance is validated and shared without exposing player tokens',()=>{
+ rooms.clear();const custom={shirt:'#ff5566',pants:'#112233',skin:'#dab194',hair:'#334455',shoes:'#abcdef',hairStyle:'fringe',glasses:'sun',outfit:'jersey',pantsStyle:'shorts',build:1.15};
+ const {room:r,player:a}=create('Quí',0,custom);const b=join(r.code,'Anh Hồ',1,{outfit:'polo'}).player;
+ assert.deepEqual(view(r,b).players[0].appearance,custom);assert.equal(view(r,a).players[1].appearance.outfit,'polo');assert.equal(view(r,a).players[1].appearance.shirt,'#e1e8f3');
+ custom.shirt='#000000';assert.equal(a.appearance.shirt,'#ff5566');assert.equal(JSON.stringify(view(r,b)).includes(a.token),false);
+ for(const invalid of [{shirt:'url(secret)'},{skin:'#fff'},{build:99},{build:NaN},{glasses:'other'},{hairStyle:'other'},{outfit:'other'},[]]){const before=r.players.length;assert.throws(()=>join(r.code,'Nguyên',2,invalid));assert.equal(r.players.length,before);}
+ act(r,a,'start',r.revision);assert.equal(view(r,b).players[0].appearance.shirt,'#ff5566');
+});
